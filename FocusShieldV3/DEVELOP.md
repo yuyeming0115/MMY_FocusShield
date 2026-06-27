@@ -106,35 +106,87 @@ private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
 
 ## 遇到的问题和解决方案
 
-### 问题 1：图标加载崩溃
-**症状**：多种方式加载 .ico 文件都崩溃（URI/BitmapFrame/IconBitmapDecoder）
+### 问题 1：图标加载崩溃 + 单文件发布图标丢失
+**症状**：
+1. 开发模式下多种方式加载 .ico 文件都崩溃（URI/BitmapFrame/IconBitmapDecoder）
+2. 单文件发布（`PublishSingleFile`）后，文件管理器/任务栏/窗口标题栏/托盘图标全部丢失
 
 **尝试过的失败方案**：
 1. `new BitmapImage(new Uri("pack://application:,,,/FocusShield.ico"))` — 找不到资源
 2. `BitmapFrame.Create(new Uri(...))` — 同样找不到资源
 3. `IconBitmapDecoder` — WPF 对 .ico 解码方式敏感
+4. 单文件发布后靠 `Path.Combine(exeDir, "FocusShield.ico")` 读文件 — 找不到（exe 运行时解压到临时目录）
 
-**最终成功方案**：
-```csharp
-// 使用 System.Drawing.Icon + CreateBitmapSourceFromHIcon
-string icoPath = System.IO.Path.Combine(exeDir, "FocusShield.ico");
-if (System.IO.File.Exists(icoPath))
-{
-    var sdIcon = new System.Drawing.Icon(icoPath);
-    var icon = System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(
-        sdIcon.Handle,
-        System.Windows.Int32Rect.Empty,
-        System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions());
-    this.Icon = icon;              // 窗口标题栏图标
-    TrayIcon.Icon = sdIcon;       // 托盘图标（接受 System.Drawing.Icon）
-    sdIcon.Dispose();
-}
+**最终成功方案（双重策略）**：
+
+**步骤 1：.csproj 配置**
+```xml
+<PropertyGroup>
+  <ApplicationIcon>FocusShield.ico</ApplicationIcon>
+</PropertyGroup>
+
+<ItemGroup>
+  <!-- 内嵌到程序集（单文件发布模式用） -->
+  <EmbeddedResource Include="FocusShield.ico">
+    <LogicalName>FocusShield.ico</LogicalName>
+  </EmbeddedResource>
+  <!-- 复制到输出目录（开发模式用） -->
+  <Content Include="FocusShield.ico">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </Content>
+</ItemGroup>
 ```
 
-**经验教训**：
-- WPF 对 .ico 文件的解码支持不完善，优先使用 `System.Drawing.Icon`
+**步骤 2：运行时加载（优先内嵌资源，回退文件路径）**
+```csharp
+// MainWindow.xaml.cs 构造函数
+try
+{
+    System.Drawing.Icon? sdIcon = null;
+
+    // 策略1：从程序集内嵌资源读取（单文件发布模式首选）
+    var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+    using (var stream = assembly.GetManifestResourceStream("FocusShield.ico"))
+    {
+        if (stream != null)
+        {
+            sdIcon = new System.Drawing.Icon(stream);
+        }
+    }
+
+    // 策略2：从文件路径回退（开发模式）
+    if (sdIcon == null)
+    {
+        string? exeDir = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule?.FileName);
+        if (exeDir != null)
+        {
+            string icoPath = System.IO.Path.Combine(exeDir, "FocusShield.ico");
+            if (System.IO.File.Exists(icoPath))
+            {
+                sdIcon = new System.Drawing.Icon(icoPath);
+            }
+        }
+    }
+
+    if (sdIcon != null)
+    {
+        // 窗口标题栏图标（WPF ImageSource）
+        var wpfIcon = Imaging.CreateBitmapSourceFromHIcon(
+            sdIcon.Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+        this.Icon = wpfIcon;
+        // 托盘图标（Hardcodet 直接接受 System.Drawing.Icon）
+        TrayIcon.Icon = sdIcon; // 注意：托盘持有引用，此处不 Dispose
+    }
+}
+catch (Exception ex) { App.Log($"Icon load skipped: {ex.Message}"); }
+```
+
+**关键知识点**：
+- `<ApplicationIcon>`：设置 exe 文件原生图标（文件管理器、任务栏显示）
+- `<EmbeddedResource>`：将 .ico 嵌入程序集，运行时通过 `GetManifestResourceStream()` 读取
+- 单文件发布时，exe 运行会解压到临时目录，`MainModule.FileName` 指向临时路径，旁边没有 .ico 文件
 - 托盘图标（`TaskbarIcon`）的 `.Icon` 属性接受 `System.Drawing.Icon` 类型，不是 WPF 的 `ImageSource`
-- .ico 文件必须设置为 `<Content>` 并 `CopyToOutputDirectory`
+- 托盘持有 `System.Drawing.Icon` 引用期间**不能 Dispose**，否则托盘图标会消失
 
 ### 问题 2：启动黑屏闪现
 **症状**：应用启动时会出现黑屏闪一下才消失。
