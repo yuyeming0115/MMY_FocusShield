@@ -169,6 +169,14 @@ namespace FocusShield
             }
             catch { }
 
+            // 加载荧光棒尺寸
+            NumGlowWidth.Value = (int)ConfigManager.Current.GlowWidth;
+            NumGlowHeight.Value = (int)ConfigManager.Current.GlowHeight;
+            
+            // 加载光晕效果参数
+            NumGlowBlurRadius.Value = (int)ConfigManager.Current.GlowBlurRadius;
+            NumGlowIntensity.Value = ConfigManager.Current.GlowIntensity;
+
             // === [核心] 初始化语言 ===
             // 如果配置里没有语言，默认设为英文
             string currentLang = string.IsNullOrEmpty(ConfigManager.Current.Language) ? "en-US" : ConfigManager.Current.Language;
@@ -370,8 +378,8 @@ namespace FocusShield
             {
                 Type? shellType = Type.GetTypeFromProgID("WScript.Shell");
                 if (shellType == null) return null;
-                dynamic shell = Activator.CreateInstance(shellType);
-                dynamic shortcut = shell.CreateShortcut(lnkPath);
+                dynamic shell = Activator.CreateInstance(shellType)!;
+                dynamic shortcut = shell.CreateShortcut(lnkPath)!;
                 return shortcut.TargetPath as string;
             }
             catch { return null; }
@@ -383,6 +391,38 @@ namespace FocusShield
             {
                 ConfigManager.Current.GlowColor = e.NewValue.Value.ToString();
                 ApplyTheme(); // 仅更新设置界面上的演示灯
+            }
+        }
+
+        // 荧光棒尺寸改变事件
+        private void NumGlowSize_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            if (NumGlowWidth.Value.HasValue)
+                ConfigManager.Current.GlowWidth = NumGlowWidth.Value.Value;
+            
+            if (NumGlowHeight.Value.HasValue)
+                ConfigManager.Current.GlowHeight = NumGlowHeight.Value.Value;
+
+            // 实时更新荧光棒尺寸
+            if (_overlay != null)
+            {
+                _overlay.SetSize(ConfigManager.Current.GlowWidth, ConfigManager.Current.GlowHeight);
+            }
+        }
+
+        // 光晕效果参数改变事件
+        private void NumGlowEffect_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            if (NumGlowBlurRadius.Value.HasValue)
+                ConfigManager.Current.GlowBlurRadius = NumGlowBlurRadius.Value.Value;
+            
+            if (NumGlowIntensity.Value.HasValue)
+                ConfigManager.Current.GlowIntensity = NumGlowIntensity.Value.Value;
+
+            // 实时更新光晕效果
+            if (_overlay != null)
+            {
+                _overlay.ApplyGlowSettings();
             }
         }
 
