@@ -10,6 +10,12 @@
     <AssemblyName>FocusShield</AssemblyName>
     <RootNamespace>FocusShield</RootNamespace>
     <ApplicationIcon>FocusShield.ico</ApplicationIcon>
+    
+    <!-- 版本信息 -->
+    <Version>3.1.0</Version>
+    <AssemblyVersion>3.1.0.0</AssemblyVersion>
+    <FileVersion>3.1.0.0</FileVersion>
+    <InformationalVersion>3.1.0</InformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>
