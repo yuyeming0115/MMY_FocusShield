@@ -1,0 +1,29 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="Lang_Title">FOCUS SHIELD</sys:String>
+
+    <sys:String x:Key="Lang_Blacklist_Title">Blacklist (apps in this list will force English input)</sys:String>
+    <sys:String x:Key="Lang_Drag_Hint">Drag shortcut or exe here, or click '+ Add'</sys:String>
+    <sys:String x:Key="Lang_Btn_Remove">Remove Selected</sys:String>
+    <sys:String x:Key="Lang_Placeholder_App">Select running app...</sys:String>
+    <sys:String x:Key="Lang_Btn_Add">Add</sys:String>
+
+    <sys:String x:Key="Lang_Hotkeys_Title">Hotkeys</sys:String>
+    <sys:String x:Key="Lang_Advanced_Title">Advanced Settings</sys:String>
+    <sys:String x:Key="Lang_Hotkey_Switch">Toggle Lock</sys:String>
+    <sys:String x:Key="Lang_Hotkey_Settings">Open Settings</sys:String>
+
+    <sys:String x:Key="Lang_Personalization_Title">Personalization</sys:String>
+    <sys:String x:Key="Lang_Label_Language">Language</sys:String>
+    <sys:String x:Key="Lang_Label_Color">Glow Color</sys:String>
+    <sys:String x:Key="Lang_Chk_AutoStart">Run on Startup</sys:String>
+
+    <sys:String x:Key="Lang_Btn_Save">Save &amp; Hide</sys:String>
+    <sys:String x:Key="Lang_Btn_Quit">Quit</sys:String>
+
+    <sys:String x:Key="Lang_Tray_Locked">Focus Mode ON</sys:String>
+    <sys:String x:Key="Lang_Tray_Unlocked">Focus Mode OFF</sys:String>
+    <sys:String x:Key="Lang_Msg_Saved">Settings Saved. Running in background.</sys:String>
+</ResourceDictionary>

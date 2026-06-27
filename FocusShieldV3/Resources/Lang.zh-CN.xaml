@@ -1,0 +1,29 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="Lang_Title">专注护盾</sys:String>
+
+    <sys:String x:Key="Lang_Blacklist_Title">屏蔽列表（列表中的软件将强制英文输入）</sys:String>
+    <sys:String x:Key="Lang_Drag_Hint">拖入快捷方式或 exe，或点击「+ 添加」</sys:String>
+    <sys:String x:Key="Lang_Btn_Remove">移除选中项</sys:String>
+    <sys:String x:Key="Lang_Placeholder_App">选择运行中的应用...</sys:String>
+    <sys:String x:Key="Lang_Btn_Add">添加</sys:String>
+
+    <sys:String x:Key="Lang_Hotkeys_Title">快捷键设置</sys:String>
+    <sys:String x:Key="Lang_Advanced_Title">更多设置</sys:String>
+    <sys:String x:Key="Lang_Hotkey_Switch">开关专注模式</sys:String>
+    <sys:String x:Key="Lang_Hotkey_Settings">打开设置面板</sys:String>
+
+    <sys:String x:Key="Lang_Personalization_Title">个性化</sys:String>
+    <sys:String x:Key="Lang_Label_Language">界面语言</sys:String>
+    <sys:String x:Key="Lang_Label_Color">光盾颜色</sys:String>
+    <sys:String x:Key="Lang_Chk_AutoStart">开机自动启动</sys:String>
+
+    <sys:String x:Key="Lang_Btn_Save">保存并隐藏</sys:String>
+    <sys:String x:Key="Lang_Btn_Quit">退出程序</sys:String>
+
+    <sys:String x:Key="Lang_Tray_Locked">专注模式：已开启</sys:String>
+    <sys:String x:Key="Lang_Tray_Unlocked">专注模式：已关闭</sys:String>
+    <sys:String x:Key="Lang_Msg_Saved">设置已保存，程序将在后台运行。</sys:String>
+</ResourceDictionary>
