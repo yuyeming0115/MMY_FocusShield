@@ -31,26 +31,48 @@ namespace FocusShield
                 InitializeComponent();
                 App.Log("MainWindow constructor start");
 
-                // 0. 设置图标
+                // 0. 设置图标（优先从内嵌资源读取，兼容单文件发布模式）
                 try
                 {
-                    string? exeDir = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule?.FileName);
-                    if (exeDir != null)
+                    System.Drawing.Icon? sdIcon = null;
+
+                    // 策略1：从程序集内嵌资源读取（单文件发布模式首选）
+                    var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                    using (var stream = assembly.GetManifestResourceStream("FocusShield.ico"))
                     {
-                        string icoPath = System.IO.Path.Combine(exeDir, "FocusShield.ico");
-                        if (System.IO.File.Exists(icoPath))
+                        if (stream != null)
                         {
-                            var sdIcon = new System.Drawing.Icon(icoPath);
-                            // 窗口标题栏图标（WPF ImageSource）
-                            var wpfIcon = System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(
-                                sdIcon.Handle,
-                                System.Windows.Int32Rect.Empty,
-                                System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions());
-                            this.Icon = wpfIcon;
-                            // 托盘图标（Hardcodet 直接接受 System.Drawing.Icon）
-                            TrayIcon.Icon = sdIcon;
-                            App.Log($"Icon loaded OK");
+                            sdIcon = new System.Drawing.Icon(stream);
+                            App.Log("Icon loaded from embedded resource");
                         }
+                    }
+
+                    // 策略2：从文件路径回退（开发模式）
+                    if (sdIcon == null)
+                    {
+                        string? exeDir = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule?.FileName);
+                        if (exeDir != null)
+                        {
+                            string icoPath = System.IO.Path.Combine(exeDir, "FocusShield.ico");
+                            if (System.IO.File.Exists(icoPath))
+                            {
+                                sdIcon = new System.Drawing.Icon(icoPath);
+                                App.Log("Icon loaded from file path");
+                            }
+                        }
+                    }
+
+                    if (sdIcon != null)
+                    {
+                        // 窗口标题栏图标（WPF ImageSource）
+                        var wpfIcon = System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(
+                            sdIcon.Handle,
+                            System.Windows.Int32Rect.Empty,
+                            System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions());
+                        this.Icon = wpfIcon;
+                        // 托盘图标（Hardcodet 直接接受 System.Drawing.Icon）
+                        TrayIcon.Icon = sdIcon; // 注意：托盘持有引用，此处不 Dispose
+                        App.Log("Icon applied OK");
                     }
                 }
                 catch (Exception ex) { App.Log($"Icon load skipped: {ex.Message}"); }

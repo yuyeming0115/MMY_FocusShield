@@ -9,6 +9,7 @@
     <UseWPF>true</UseWPF>
     <AssemblyName>FocusShield</AssemblyName>
     <RootNamespace>FocusShield</RootNamespace>
+    <ApplicationIcon>FocusShield.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +18,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="FocusShield.ico">
+      <LogicalName>FocusShield.ico</LogicalName>
+    </EmbeddedResource>
     <Content Include="FocusShield.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
