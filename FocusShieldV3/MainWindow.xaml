@@ -195,6 +195,35 @@
                 </StackPanel>
             </Grid>
 
+            <!-- 荧光棒尺寸设置 -->
+            <Grid Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 宽度设置 -->
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="荧光棒宽度" Style="{StaticResource FieldLabel}"/>
+                    <xctk:IntegerUpDown Name="NumGlowWidth" 
+                                        Minimum="5" Maximum="50" 
+                                        Increment="1" 
+                                        Height="30"
+                                        ValueChanged="NumGlowSize_ValueChanged"/>
+                </StackPanel>
+
+                <!-- 高度设置 -->
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="荧光棒高度" Style="{StaticResource FieldLabel}"/>
+                    <xctk:IntegerUpDown Name="NumGlowHeight" 
+                                        Minimum="50" Maximum="500" 
+                                        Increment="10" 
+                                        Height="30"
+                                        ValueChanged="NumGlowSize_ValueChanged"/>
+                </StackPanel>
+            </Grid>
+
             <CheckBox Name="ChkAutoStart" Content="{DynamicResource Lang_Chk_AutoStart}" Margin="0,0,0,16"
                       Checked="ChkAutoStart_Changed" Unchecked="ChkAutoStart_Changed"
                       Foreground="#444" FontSize="11.5" VerticalContentAlignment="Center"/>

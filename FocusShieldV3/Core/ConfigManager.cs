@@ -36,6 +36,10 @@ namespace FocusShield.Core
 
         public HotkeySetting HotkeySwitch { get; set; } = new HotkeySetting { Modifier = 1, Key = 81, DisplayText = "Alt + Q" };
         public HotkeySetting HotkeySettings { get; set; } = new HotkeySetting { Modifier = 1, Key = 83, DisplayText = "Alt + S" };
+
+        // 荧光棒尺寸设置
+        public double GlowWidth { get; set; } = 10;
+        public double GlowHeight { get; set; } = 120;
     }
 
     public class DeepFlowRule

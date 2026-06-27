@@ -4,6 +4,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
+using FocusShield.Core;
 
 namespace FocusShield
 {
@@ -22,6 +23,11 @@ namespace FocusShield
         public OverlayWindow()
         {
             InitializeComponent();
+            
+            // 应用配置中的尺寸
+            this.Width = ConfigManager.Current.GlowWidth;
+            this.Height = ConfigManager.Current.GlowHeight;
+            
             // 初始位置：屏幕右侧边缘，垂直居中（更醒目）
             double screenWidth = SystemParameters.WorkArea.Width;
             this.Left = screenWidth - this.Width;
@@ -40,6 +46,13 @@ namespace FocusShield
                 }
             }
             catch { }
+        }
+
+        // 设置荧光棒尺寸
+        public void SetSize(double width, double height)
+        {
+            this.Width = width;
+            this.Height = height;
         }
 
         // 设置视觉状态（开启/关闭）
