@@ -40,6 +40,10 @@ namespace FocusShield.Core
         // 荧光棒尺寸设置
         public double GlowWidth { get; set; } = 10;
         public double GlowHeight { get; set; } = 120;
+        
+        // 荧光棒发光设置
+        public double GlowBlurRadius { get; set; } = 20;
+        public double GlowIntensity { get; set; } = 1.0;
     }
 
     public class DeepFlowRule

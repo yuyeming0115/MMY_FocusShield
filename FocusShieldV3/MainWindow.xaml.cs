@@ -172,6 +172,10 @@ namespace FocusShield
             // 加载荧光棒尺寸
             NumGlowWidth.Value = (int)ConfigManager.Current.GlowWidth;
             NumGlowHeight.Value = (int)ConfigManager.Current.GlowHeight;
+            
+            // 加载光晕效果参数
+            NumGlowBlurRadius.Value = (int)ConfigManager.Current.GlowBlurRadius;
+            NumGlowIntensity.Value = ConfigManager.Current.GlowIntensity;
 
             // === [核心] 初始化语言 ===
             // 如果配置里没有语言，默认设为英文
@@ -403,6 +407,22 @@ namespace FocusShield
             if (_overlay != null)
             {
                 _overlay.SetSize(ConfigManager.Current.GlowWidth, ConfigManager.Current.GlowHeight);
+            }
+        }
+
+        // 光晕效果参数改变事件
+        private void NumGlowEffect_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            if (NumGlowBlurRadius.Value.HasValue)
+                ConfigManager.Current.GlowBlurRadius = NumGlowBlurRadius.Value.Value;
+            
+            if (NumGlowIntensity.Value.HasValue)
+                ConfigManager.Current.GlowIntensity = NumGlowIntensity.Value.Value;
+
+            // 实时更新光晕效果
+            if (_overlay != null)
+            {
+                _overlay.ApplyGlowSettings();
             }
         }
 

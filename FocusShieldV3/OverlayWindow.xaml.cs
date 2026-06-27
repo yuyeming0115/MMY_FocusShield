@@ -3,7 +3,6 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
-using System.Windows.Threading;
 using FocusShield.Core;
 
 namespace FocusShield
@@ -17,8 +16,7 @@ namespace FocusShield
 
         private bool _isDragging = false;
         private Point _dragStartPoint;
-        private DispatcherTimer? _clickTimer;
-        private bool _clickHandled = false;
+        private bool _isActive = true;
 
         public OverlayWindow()
         {
@@ -32,6 +30,9 @@ namespace FocusShield
             double screenWidth = SystemParameters.WorkArea.Width;
             this.Left = screenWidth - this.Width;
             this.Top = (SystemParameters.WorkArea.Height - this.Height) / 2;
+
+            // 应用发光设置
+            ApplyGlowSettings();
         }
 
         public void SetColor(string colorHex)
@@ -55,17 +56,30 @@ namespace FocusShield
             this.Height = height;
         }
 
+        // 应用发光设置
+        public void ApplyGlowSettings()
+        {
+            if (GlowBorder.Effect is DropShadowEffect shadow)
+            {
+                shadow.BlurRadius = ConfigManager.Current.GlowBlurRadius;
+                shadow.Opacity = ConfigManager.Current.GlowIntensity;
+                shadow.ShadowDepth = 0;
+            }
+        }
+
         // 设置视觉状态（开启/关闭）
         public void SetActiveState(bool isActive)
         {
+            _isActive = isActive;
+            
             if (isActive)
             {
                 // 开启：全发光
                 GlowBorder.Opacity = 1.0;
                 if (GlowBorder.Effect is DropShadowEffect shadow)
                 {
-                    shadow.Opacity = 1.0;
-                    shadow.BlurRadius = 15;
+                    shadow.Opacity = ConfigManager.Current.GlowIntensity;
+                    shadow.BlurRadius = ConfigManager.Current.GlowBlurRadius;
                 }
                 // 更新右键菜单文字
                 if (MenuToggle != null)
@@ -87,70 +101,48 @@ namespace FocusShield
 
         // ===== 鼠标交互 =====
 
-        // 左键按下：记录位置 + 启动单击判定定时器
+        // 左键按下：开始拖拽
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            _clickHandled = false;
-            _dragStartPoint = e.GetPosition(this);
-            _isDragging = false;
-
-            // 启动 200ms 定时器，判断是否为单击
-            _clickTimer = new DispatcherTimer
+            if (e.ButtonState == MouseButtonState.Pressed)
             {
-                Interval = TimeSpan.FromMilliseconds(200)
-            };
-            _clickTimer.Tick += (s, args) =>
-            {
-                _clickTimer.Stop();
-                // 200ms 内没有拖拽 → 判定为单击
-                if (!_isDragging && !_clickHandled)
-                {
-                    _clickHandled = true;
-                    OnToggleRequested?.Invoke();
-                }
-            };
-            _clickTimer.Start();
-
-            // 不立即调用 DragMove()，等 Move 事件判断
-            e.Handled = false;
-            base.OnMouseLeftButtonDown(e);
-        }
-
-        // 鼠标移动：判断是否进入拖拽模式
-        private void Window_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed && !_isDragging)
-            {
-                var currentPos = e.GetPosition(this);
-                double deltaX = Math.Abs(currentPos.X - _dragStartPoint.X);
-                double deltaY = Math.Abs(currentPos.Y - _dragStartPoint.Y);
-
-                // 移动超过 5px → 判定为拖拽
-                if (deltaX > 5 || deltaY > 5)
-                {
-                    _isDragging = true;
-                    _clickTimer?.Stop();
-                    DragMove();
-                }
+                _isDragging = true;
+                _dragStartPoint = e.GetPosition(this);
+                this.CaptureMouse();
+                e.Handled = true;
             }
         }
 
-        // 左键释放：拖拽结束
+        // 鼠标移动：执行拖拽
+        private void Window_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isDragging && e.LeftButton == MouseButtonState.Pressed)
+            {
+                var currentPos = e.GetPosition(this);
+                double deltaX = currentPos.X - _dragStartPoint.X;
+                double deltaY = currentPos.Y - _dragStartPoint.Y;
+
+                // 更新窗口位置
+                this.Left += deltaX;
+                this.Top += deltaY;
+            }
+        }
+
+        // 左键释放：结束拖拽
         private void Window_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (_isDragging)
             {
                 _isDragging = false;
+                this.ReleaseMouseCapture();
                 SnapToEdge();
             }
         }
 
-        // 双击：打开设置
+        // 双击：切换状态
         private void Window_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            _clickHandled = true; // 阻止单击逻辑
-            _clickTimer?.Stop();
-            OnSettingsRequested?.Invoke();
+            OnToggleRequested?.Invoke();
         }
 
         // 右键：显示上下文菜单
