@@ -1,7 +1,7 @@
 @echo off
 chcp 65001 >nul
 echo ========================================
-echo FocusShield 打包工具
+echo FocusShield Packaging Tool
 echo ========================================
 
 set VERSION=3.1.0
@@ -9,65 +9,59 @@ set TIMESTAMP=%date:~0,4%%date:~5,2%%date:~8,2%_%time:~0,2%%time:~3,2%%time:~6,2
 set TIMESTAMP=%TIMESTAMP: =0%
 set OUTPUT_NAME=FocusShield_v%VERSION%_%TIMESTAMP%.exe
 set RELEASE_DIR=D:\GitWork\MMY_FocusShield\release
-set TEMP_DIR=D:\GitWork\MMY_FocusShield\FocusShieldV3\temp_publish
+set PROJECT_DIR=D:\GitWork\MMY_FocusShield\FocusShieldV3
+set TEMP_DIR=%PROJECT_DIR%\temp_publish
 
-echo 版本号: %VERSION%
-echo 时间戳: %TIMESTAMP%
-echo 输出文件: %OUTPUT_NAME%
+echo Version: %VERSION%
+echo Timestamp: %TIMESTAMP%
+echo Output: %OUTPUT_NAME%
 echo ========================================
 
 if not exist "%RELEASE_DIR%" mkdir "%RELEASE_DIR%"
 if exist "%TEMP_DIR%" rmdir /s /q "%TEMP_DIR%"
 
 echo.
-echo 开始打包...
-cd /d D:\GitWork\MMY_FocusShield\FocusShieldV3
+echo Building...
+cd /d "%PROJECT_DIR%"
 
-dotnet publish -c Release -r win-x64 --self-contained true ^
-    /p:PublishSingleFile=true ^
-    /p:IncludeNativeLibrariesForSelfExtract=true ^
-    /p:EnableCompressionInSingleFile=true ^
-    -o "%TEMP_DIR%"
+dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o "%TEMP_DIR%"
 
 if %errorlevel% neq 0 (
     echo.
-    echo ✗ 打包失败！
+    echo Build failed!
     pause
     exit /b 1
 )
 
-echo ✓ 打包成功！
+echo Build succeeded!
 
 echo.
-echo 复制文件到release目录...
+echo Copying to release...
 copy "%TEMP_DIR%\FocusShield.exe" "%RELEASE_DIR%\%OUTPUT_NAME%" >nul
 
 if exist "%RELEASE_DIR%\%OUTPUT_NAME%" (
-    echo ✓ 文件已保存: %RELEASE_DIR%\%OUTPUT_NAME%
-    for %%A in ("%RELEASE_DIR%\%OUTPUT_NAME%") do echo   文件大小: %%~zA bytes
+    echo File saved: %RELEASE_DIR%\%OUTPUT_NAME%
 ) else (
-    echo ✗ 文件复制失败！
+    echo Copy failed!
     pause
     exit /b 1
 )
 
 echo.
-echo 清理临时文件...
+echo Cleaning up...
 if exist "%TEMP_DIR%" rmdir /s /q "%TEMP_DIR%"
-echo ✓ 临时文件已清理
+echo Cleanup done.
 
 echo.
 echo ========================================
-echo release 目录内容:
+echo Release files:
 echo ========================================
-dir "%RELEASE_DIR%\*.exe" | findstr /r ".exe"
+dir "%RELEASE_DIR%\*.exe" /b
 
 echo.
 echo ========================================
-echo 打包完成！
+echo Done!
 echo ========================================
 echo.
-echo 打开release目录...
 explorer "%RELEASE_DIR%"
-
 pause
